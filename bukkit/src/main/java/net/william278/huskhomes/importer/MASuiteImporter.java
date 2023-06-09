@@ -66,7 +66,8 @@ public class MASuiteImporter extends Importer {
     private int importHomes() throws SQLException {
         List<Home> homes = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement("SELECT name,owner,world,x,y,z,yaw,pitch FROM masuite_homes WHERE server=?;")) {
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT name,owner,world,x,y,z,yaw,pitch FROM masuite_homes WHERE server=?;")) {
             statement.setString(1,plugin.getServerName());
             try(ResultSet results = statement.executeQuery()) {
                 while(results.next()) {
@@ -89,30 +90,39 @@ public class MASuiteImporter extends Importer {
                     this.normalizeName(home.name()),
                     home.position(),
                     true,
-                    false
+                    true
             );
             homesImported.getAndIncrement();
         }
         return homesImported.get();
     }
 
-    private int importWarps() throws Throwable {
-        final AtomicInteger warpsImported = new AtomicInteger();
-        final Warps warps = essentials.getWarps();
-        for (String warpName : warps.getList()) {
-            if (warps.getWarp(warpName) == null || warps.getWarp(warpName).getWorld() == null) {
-                continue;
+    private record Warp(String name, Position position) {}
+    private int importWarps() throws SQLException {
+        List<Warp> warps = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection();
+            PreparedStatement statement = connection.prepareStatement(
+                    "SELECT name, world, x, y, z, yaw, pitch FROM masuite_warps WHERE server=?;")) {
+            statement.setString(1, plugin.getServerName());
+            try(ResultSet results = statement.executeQuery()) {
+                while (results.next()) {
+                    String name = results.getString(1);
+                    World world = BukkitAdapter.adaptWorld(Bukkit.getWorld(results.getString(2))).get();
+                    Position position = Position.at(results.getDouble(3),results.getDouble(4),
+                            results.getDouble(5),results.getFloat(6),results.getFloat(7),
+                            world, plugin.getServerName());
+                    warps.add(new Warp(name, position));
+                }
             }
-            BukkitAdapter.adaptLocation(warps.getWarp(warpName))
-                    .map(location -> Position.at(location, plugin.getServerName()))
-                    .ifPresent(position -> {
-                        plugin.getManager().warps().createWarp(
-                                this.normalizeName(warpName),
-                                position,
-                                true
-                        );
-                        warpsImported.getAndIncrement();
-                    });
+        }
+        final AtomicInteger warpsImported = new AtomicInteger();
+        for (Warp warp : warps) {
+            plugin.getManager().warps().createWarp(
+                this.normalizeName(warp.name()),
+                warp.position(),
+                true
+            );
+            warpsImported.getAndIncrement();
         }
         return warpsImported.get();
     }
