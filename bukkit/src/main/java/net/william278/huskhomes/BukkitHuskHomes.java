@@ -38,6 +38,7 @@ import net.william278.huskhomes.hook.PlaceholderAPIHook;
 import net.william278.huskhomes.hook.RedisEconomyHook;
 import net.william278.huskhomes.hook.VaultEconomyHook;
 import net.william278.huskhomes.importer.EssentialsXImporter;
+import net.william278.huskhomes.importer.MASuiteImporter;
 import net.william278.huskhomes.listener.BukkitEventListener;
 import net.william278.huskhomes.listener.EventListener;
 import net.william278.huskhomes.manager.Manager;
@@ -234,6 +235,10 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
         // Importers
         if (isDependencyLoaded("Essentials")) {
             getHooks().add(new EssentialsXImporter(this));
+        }
+        File masuiteFile = new File(getDataFolder(), "masuite.yml");
+        if (masuiteFile.exists()) {
+            getHooks().add(new MASuiteImporter(this));
         }
     }
 
