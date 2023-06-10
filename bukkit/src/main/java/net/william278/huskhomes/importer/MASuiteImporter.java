@@ -21,11 +21,13 @@ package net.william278.huskhomes.importer;
 
 import com.earth2me.essentials.Warps;
 import com.zaxxer.hikari.HikariDataSource;
+import net.william278.huskhomes.BukkitHuskHomes;
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.position.World;
 import net.william278.huskhomes.user.User;
 import net.william278.huskhomes.util.BukkitAdapter;
+import net.william278.huskhomes.util.ValidationException;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
@@ -86,13 +88,19 @@ public class MASuiteImporter extends Importer {
         for (Home home : homes) {
             plugin.getDatabase().ensureUser(home.owner());
             plugin.getSavedUsers().add(plugin.getDatabase().getUserData(home.owner().getUuid()).get());
-            plugin.getManager().homes().createHome(
-                    home.owner(),
-                    this.normalizeName(home.name()),
-                    home.position(),
-                    true,
-                    true
-            );
+            try {
+                plugin.getManager().homes().createHome(
+                        home.owner(),
+                        this.normalizeName(home.name()),
+                        home.position(),
+                        true,
+                        true
+                );
+            } catch (ValidationException e) {
+                ((BukkitHuskHomes)plugin).getLogger().severe(
+                        String.format("The home %s owned by %s with UUID %s caused a ValidationException: %s.",
+                                home.name(), home.owner().getUsername(), home.owner().getUuid(), e.getType()));
+            }
             homesImported.getAndIncrement();
         }
         return homesImported.get();
