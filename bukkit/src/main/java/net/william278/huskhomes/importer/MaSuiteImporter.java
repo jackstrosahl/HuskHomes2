@@ -19,7 +19,6 @@
 
 package net.william278.huskhomes.importer;
 
-import com.earth2me.essentials.Warps;
 import com.zaxxer.hikari.HikariDataSource;
 import net.william278.huskhomes.BukkitHuskHomes;
 import net.william278.huskhomes.HuskHomes;
@@ -44,10 +43,10 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MASuiteImporter extends Importer {
+public class MaSuiteImporter extends Importer {
     HikariDataSource dataSource;
-    public MASuiteImporter(@NotNull HuskHomes plugin) {
-        super("MASuite", List.of(ImportData.HOMES, ImportData.WARPS), plugin);
+    public MaSuiteImporter(@NotNull HuskHomes plugin) {
+        super("MaSuite", List.of(ImportData.HOMES, ImportData.WARPS), plugin);
         FileConfiguration masuiteConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(),
                 "masuite.yml"));
         ConfigurationSection dbSection = masuiteConfig.getConfigurationSection("database");
