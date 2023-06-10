@@ -85,8 +85,9 @@ public class MASuiteImporter extends Importer {
         final AtomicInteger homesImported = new AtomicInteger();
         for (Home home : homes) {
             plugin.getDatabase().ensureUser(home.owner());
+            plugin.getSavedUsers().add(plugin.getDatabase().getUserData(home.owner().getUuid()).get());
             plugin.getManager().homes().createHome(
-                    home.owner,
+                    home.owner(),
                     this.normalizeName(home.name()),
                     home.position(),
                     true,
