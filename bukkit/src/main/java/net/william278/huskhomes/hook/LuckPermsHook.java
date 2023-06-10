@@ -23,6 +23,7 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.PermissionNode;
+import net.luckperms.api.query.QueryOptions;
 import net.william278.huskhomes.BukkitHuskHomes;
 import net.william278.huskhomes.HuskHomes;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -55,7 +56,7 @@ public class LuckPermsHook extends PermissionHook {
     @Override
     public Map<String, Boolean> getPermissions(net.william278.huskhomes.user.User user) {
         User lpUser = luckPerms.getUserManager().loadUser(user.getUuid()).join();
-        Collection<PermissionNode> nodes = lpUser.getNodes(NodeType.PERMISSION);
+        Collection<PermissionNode> nodes = lpUser.resolveInheritedNodes(NodeType.PERMISSION, QueryOptions.nonContextual());
         Map<String, Boolean> out = new HashMap<>();
         for(PermissionNode node : nodes) {
             out.put(node.getKey(),node.getValue());
