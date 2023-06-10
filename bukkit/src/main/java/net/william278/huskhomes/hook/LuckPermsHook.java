@@ -54,7 +54,7 @@ public class LuckPermsHook extends PermissionHook {
 
     @Override
     public Map<String, Boolean> getPermissions(net.william278.huskhomes.user.User user) {
-        User lpUser = luckPerms.getUserManager().getUser(user.getUuid());
+        User lpUser = luckPerms.getUserManager().loadUser(user.getUuid()).join();
         Collection<PermissionNode> nodes = lpUser.getNodes(NodeType.PERMISSION);
         Map<String, Boolean> out = new HashMap<>();
         for(PermissionNode node : nodes) {
