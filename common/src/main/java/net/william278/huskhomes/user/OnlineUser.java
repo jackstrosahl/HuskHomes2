@@ -206,6 +206,9 @@ public abstract class OnlineUser extends User implements Teleportable, CommandUs
      */
     public abstract boolean isVanished();
 
+    public final int getMaxHomes(final int defaultMaxHomes, final boolean stack) {
+        return getMaxHomes(getPermissions(), defaultMaxHomes, stack);
+    }
     /**
      * Get the maximum number of homes this user may set
      *
@@ -213,8 +216,8 @@ public abstract class OnlineUser extends User implements Teleportable, CommandUs
      * @param stack           whether to stack numerical permissions that grant the user extra max homes
      * @return the maximum number of homes this user may set
      */
-    public final int getMaxHomes(final int defaultMaxHomes, final boolean stack) {
-        final List<Integer> homes = getNumericalPermissions("huskhomes.max_homes.");
+    public static int getMaxHomes(Map<String, Boolean> permissions, final int defaultMaxHomes, final boolean stack) {
+        final List<Integer> homes = getNumericalPermissions(permissions,"huskhomes.max_homes.");
         if (homes.isEmpty()) {
             return defaultMaxHomes;
         }
@@ -263,6 +266,9 @@ public abstract class OnlineUser extends User implements Teleportable, CommandUs
         }
     }
 
+    protected List<Integer> getNumericalPermissions(@NotNull String nodePrefix) {
+        return getNumericalPermissions(getPermissions(), nodePrefix);
+    }
     /**
      * Gets a list of numbers from the prefixed permission nodes
      *
@@ -270,8 +276,8 @@ public abstract class OnlineUser extends User implements Teleportable, CommandUs
      * @return a list of numbers from the prefixed permission nodes, sorted by size
      */
     @NotNull
-    protected List<Integer> getNumericalPermissions(@NotNull String nodePrefix) {
-        return getPermissions().entrySet().stream()
+    protected static List<Integer> getNumericalPermissions(Map<String, Boolean> permissions, @NotNull String nodePrefix) {
+        return permissions.entrySet().stream()
                 .filter(Map.Entry::getValue)
                 .filter(permission -> permission.getKey().startsWith(nodePrefix))
                 .filter(permission -> {

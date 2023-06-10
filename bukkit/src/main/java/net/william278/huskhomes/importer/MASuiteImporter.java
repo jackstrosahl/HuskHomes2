@@ -25,6 +25,7 @@ import net.william278.huskhomes.BukkitHuskHomes;
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.position.World;
+import net.william278.huskhomes.user.OnlineUser;
 import net.william278.huskhomes.user.User;
 import net.william278.huskhomes.util.BukkitAdapter;
 import net.william278.huskhomes.util.ValidationException;
@@ -75,7 +76,7 @@ public class MASuiteImporter extends Importer {
                 while(results.next()) {
                     String name = results.getString(1);
                     OfflinePlayer ownerPlayer = Bukkit.getOfflinePlayer(UUID.fromString(results.getString(2)));
-                    User owner = User.of(ownerPlayer.getUniqueId(), Objects.requireNonNullElse(ownerPlayer.getName(),""));
+                    User owner = OnlineUser.of(ownerPlayer.getUniqueId(), Objects.requireNonNullElse(ownerPlayer.getName(),""));
                     World world = BukkitAdapter.adaptWorld(Bukkit.getWorld(results.getString(3))).get();
                     Position position = Position.at(results.getDouble(4),results.getDouble(5),
                             results.getDouble(6),results.getFloat(7),results.getFloat(8),
@@ -100,6 +101,7 @@ public class MASuiteImporter extends Importer {
                 ((BukkitHuskHomes)plugin).getLogger().severe(
                         String.format("The home %s owned by %s with UUID %s caused a ValidationException: %s.",
                                 home.name(), home.owner().getUsername(), home.owner().getUuid(), e.getType()));
+                continue;
             }
             homesImported.getAndIncrement();
         }

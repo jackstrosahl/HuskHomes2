@@ -13,6 +13,7 @@ softdepend:
   - BlueMap
   - Plan
   - Essentials
+  - LuckPerms
 libraries:
   - 'redis.clients:jedis:${jedis_version}'
   - 'com.mysql:mysql-connector-j:${mysql_driver_version}'

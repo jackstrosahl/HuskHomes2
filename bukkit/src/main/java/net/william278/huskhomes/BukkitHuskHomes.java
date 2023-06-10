@@ -33,10 +33,7 @@ import net.william278.huskhomes.database.Database;
 import net.william278.huskhomes.database.MySqlDatabase;
 import net.william278.huskhomes.database.SqLiteDatabase;
 import net.william278.huskhomes.event.BukkitEventDispatcher;
-import net.william278.huskhomes.hook.Hook;
-import net.william278.huskhomes.hook.PlaceholderAPIHook;
-import net.william278.huskhomes.hook.RedisEconomyHook;
-import net.william278.huskhomes.hook.VaultEconomyHook;
+import net.william278.huskhomes.hook.*;
 import net.william278.huskhomes.importer.EssentialsXImporter;
 import net.william278.huskhomes.importer.MASuiteImporter;
 import net.william278.huskhomes.listener.BukkitEventListener;
@@ -234,6 +231,9 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
         File masuiteFile = new File(getDataFolder(), "masuite.yml");
         if (masuiteFile.exists()) {
             getHooks().add(new MASuiteImporter(this));
+            if(isDependencyLoaded("LuckPerms")) {
+                getHooks().add(new LuckPermsHook(this));
+            }
         }
     }
 

@@ -22,6 +22,7 @@ package net.william278.huskhomes.manager;
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.command.ListCommand;
 import net.william278.huskhomes.hook.EconomyHook;
+import net.william278.huskhomes.hook.PermissionHook;
 import net.william278.huskhomes.network.Message;
 import net.william278.huskhomes.network.Payload;
 import net.william278.huskhomes.position.Home;
@@ -318,10 +319,13 @@ public class HomesManager {
     }
 
     public int getMaxHomes(@Nullable User user) {
-        return user instanceof OnlineUser online ? online.getMaxHomes(
-                plugin.getSettings().getMaxHomes(),
-                plugin.getSettings().doStackPermissionLimits()
-        ) : plugin.getSettings().getMaxHomes();
+        int maxHomes = plugin.getSettings().getMaxHomes();
+        boolean stack = plugin.getSettings().doStackPermissionLimits();
+        if(user instanceof OnlineUser online)
+            return online.getMaxHomes(maxHomes, stack);
+        return plugin.getHook(PermissionHook.class).map(permissionHook ->
+                OnlineUser.getMaxHomes(permissionHook.getPermissions(user), maxHomes, stack))
+                .orElseGet(() -> plugin.getSettings().getMaxHomes());
     }
 
     public int getMaxPublicHomes(@Nullable User user) {
