@@ -37,11 +37,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 public class MaSuiteImporter extends Importer {
     HikariDataSource dataSource;
@@ -66,6 +64,7 @@ public class MaSuiteImporter extends Importer {
     private record Home(String name, User owner, Position position) {}
 
     private int importHomes() throws SQLException {
+        Logger logger = ((BukkitHuskHomes)plugin).getLogger();
         List<Home> homes = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(
@@ -76,10 +75,16 @@ public class MaSuiteImporter extends Importer {
                     String name = results.getString(1);
                     OfflinePlayer ownerPlayer = Bukkit.getOfflinePlayer(UUID.fromString(results.getString(2)));
                     User owner = OnlineUser.of(ownerPlayer.getUniqueId(), Objects.requireNonNullElse(ownerPlayer.getName(),""));
-                    World world = BukkitAdapter.adaptWorld(Bukkit.getWorld(results.getString(3))).get();
+                    String worldName = results.getString(3);
+                    Optional<World> world = BukkitAdapter.adaptWorld(Bukkit.getWorld(worldName));
+                    if(world.isEmpty()) {
+                        logger.severe(String.format("The home %s owned by %s with UUID %s is in a world that doesn't exist: %s.",
+                                name, ownerPlayer.getName(), ownerPlayer.getUniqueId(), worldName));
+                        continue;
+                    }
                     Position position = Position.at(results.getDouble(4),results.getDouble(5),
                             results.getDouble(6),results.getFloat(7),results.getFloat(8),
-                            world, plugin.getServerName());
+                            world.get(), plugin.getServerName());
                     homes.add(new Home(name,owner,position));
                 }
             }
@@ -97,7 +102,7 @@ public class MaSuiteImporter extends Importer {
                         true
                 );
             } catch (ValidationException e) {
-                ((BukkitHuskHomes)plugin).getLogger().severe(
+                logger.severe(
                         String.format("The home %s owned by %s with UUID %s caused a ValidationException: %s.",
                                 home.name(), home.owner().getUsername(), home.owner().getUuid(), e.getType()));
                 continue;
